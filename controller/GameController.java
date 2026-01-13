@@ -1,0 +1,148 @@
+package controller;
+
+import model.Game;
+import model.Piece;
+import view.BoardPanel;
+
+import javax.swing.*;
+
+public class GameController {
+
+    private final Game game;
+    private final BoardPanel board;
+    private JLabel rollLabel;
+    private JLabel player1Label;
+    private JLabel player2Label;
+    private int lastRoll = 0;
+
+    public GameController(Game game, BoardPanel board) {
+        this.game = game;
+        this.board = board;
+        refreshBoard();
+    }
+
+    public void setRollLabel(JLabel rollLabel) { this.rollLabel = rollLabel; }
+
+    public void setInfoLabels(JLabel p1Label, JLabel p2Label) {
+        this.player1Label = p1Label;
+        this.player2Label = p2Label;
+    }
+
+    // Roll sticks
+    public void rollSticks() {
+        lastRoll = game.rollSticks();
+        if (rollLabel != null)
+            rollLabel.setText("Player " + game.getCurrentPlayer() + " rolled: " + lastRoll);
+    }
+
+    // Move piece
+    public void onPieceSelected(Piece piece) {
+        if (piece.getOwner() != game.getCurrentPlayer()) return;
+        if (lastRoll == 0) return;
+
+        int pos = piece.getPosition();
+
+        // 1️⃣ Three Truths / Re-Atoum / Horus
+        if (piece.canExitNextTurn()) {
+            int p = pos + 1;
+            switch (p) {
+                case 28 -> {
+                    if (lastRoll == 3) piece.setCanExitNextTurn(false);
+                    else { piece.setPosition(14); piece.setCanExitNextTurn(false);
+                        if (rollLabel != null) rollLabel.setText("Failed to exit Three Truths → back to Rebirth");
+                        lastRoll = 0; refreshBoard(); return;
+                    }
+                }
+                case 29 -> {
+                    if (lastRoll == 2) piece.setCanExitNextTurn(false);
+                    else { piece.setPosition(14); piece.setCanExitNextTurn(false);
+                        if (rollLabel != null) rollLabel.setText("Failed to exit Re-Atoum → back to Rebirth");
+                        lastRoll = 0; refreshBoard(); return;
+                    }
+                }
+                case 30 -> piece.setCanExitNextTurn(false);
+            }
+        }
+
+        int targetPos = pos + lastRoll;
+
+        // 2️⃣ House of Happiness
+        if (pos < 25 && targetPos > 25) {
+            if (rollLabel != null)
+                rollLabel.setText("Cannot move past House of Happiness! Must roll exact number.");
+            return;
+        }
+
+        // 3️⃣ Collision
+        Piece occupyingPiece = game.getPieceAt(targetPos);
+        if (occupyingPiece != null) {
+            if (occupyingPiece.getOwner() != piece.getOwner()) {
+                // Swap
+                occupyingPiece.setPosition(pos);
+            } else {
+                if (rollLabel != null)
+                    rollLabel.setText("Cannot move onto your own piece!");
+                return;
+            }
+        }
+
+        // 4️⃣ House of Rebirth if occupied
+        if (targetPos == 14) {
+            Piece p = game.getPieceAt(14);
+            if (p != null && p != piece) {
+                targetPos = game.findEmptyBeforeRebirth();
+            }
+        }
+
+        // 5️⃣ Move piece
+        piece.setPosition(targetPos);
+
+        // 6️⃣ Other special houses
+        switch (targetPos + 1) {
+            case 15 -> { if (rollLabel != null) rollLabel.setText("Player landed on Rebirth!"); }
+            case 26 -> { if (rollLabel != null) rollLabel.setText("Player landed on Happiness!"); }
+            case 27 -> { piece.setPosition(14); if (rollLabel != null) rollLabel.setText("Player landed on Water → back to Rebirth!"); }
+            case 28 -> { piece.setCanExitNextTurn(true); if (rollLabel != null) rollLabel.setText("Player landed on Three Truths!"); }
+            case 29 -> { piece.setCanExitNextTurn(true); if (rollLabel != null) rollLabel.setText("Player landed on Re-Atoum!"); }
+            case 30 -> { piece.setCanExitNextTurn(true); if (rollLabel != null) rollLabel.setText("Player landed on Horus!"); }
+        }
+
+        // 7️⃣ Exit piece
+        if (targetPos >= 30) {
+            piece.setPosition(-1);
+            game.incrementPlayerExited(piece.getOwner());
+            if (rollLabel != null)
+                rollLabel.setText("Player " + piece.getOwner() + " exited a piece!");
+            int winner = game.checkWinner();
+            if (winner != 0) {
+                JOptionPane.showMessageDialog(board, "Player " + winner + " wins!");
+                return;
+            }
+        }
+
+        // 8️⃣ Extra turn for 1,3,5
+        if (lastRoll == 1 || lastRoll == 3 || lastRoll == 5) {
+            if (rollLabel != null) rollLabel.setText("Player gets another turn!");
+            lastRoll = 0;
+            refreshBoard();
+            return;
+        }
+
+        lastRoll = 0;
+        game.nextPlayer();
+        refreshBoard();
+    }
+
+    // Refresh board & info panel
+    public void refreshBoard() {
+        board.clearBoard();
+        for (Piece p : game.getAllPieces()) {
+            if (p.getPosition() >= 0 && p.getPosition() < 30)
+                board.placePiece(p.getPosition(), p);
+        }
+        if (player1Label != null)
+            player1Label.setText("Player 1 exited: " + game.getPlayer1Exited() + " pieces");
+        if (player2Label != null)
+            player2Label.setText("Player 2 exited: " + game.getPlayer2Exited() + " pieces");
+    }
+}
