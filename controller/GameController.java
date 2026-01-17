@@ -80,17 +80,63 @@ public class GameController {
             int p = pos + 1;
             switch (p) {
                 case 28 -> {
-                    if (lastRoll == 3) piece.setCanExitNextTurn(false);
-                    else { piece.setPosition(14); piece.setCanExitNextTurn(false);
-                        if (rollLabel != null) rollLabel.setText("Failed to exit Three Truths → back to Rebirth");
-                        lastRoll = 0; refreshBoard(); return;
+                    if (lastRoll == 3) {
+                        piece.setCanExitNextTurn(false);
+                    } else {
+                        // Failed to exit Three Truths
+                        piece.setPosition(14);
+                        piece.setCanExitNextTurn(false);
+                        String playerName = (computerMode && game.getCurrentPlayer() == 2) ? "Computer" : "Player " + game.getCurrentPlayer();
+                        if (rollLabel != null) rollLabel.setText(playerName + " failed to exit Three Truths → back to Rebirth");
+                        lastRoll = 0;
+                        game.nextPlayer();
+                        refreshBoard();
+                        updateButtonState();
+                        // If computer mode and it's now computer's turn, auto-roll
+                        if (computerMode && game.getCurrentPlayer() == 2) {
+                            if (rollButton != null) rollButton.setEnabled(false);
+                            Timer timer = new Timer(1000, evt -> {
+                                rollSticks();
+                                Timer moveTimer = new Timer(1500, evt2 -> {
+                                    makeComputerMove();
+                                });
+                                moveTimer.setRepeats(false);
+                                moveTimer.start();
+                            });
+                            timer.setRepeats(false);
+                            timer.start();
+                        }
+                        return;
                     }
                 }
                 case 29 -> {
-                    if (lastRoll == 2) piece.setCanExitNextTurn(false);
-                    else { piece.setPosition(14); piece.setCanExitNextTurn(false);
-                        if (rollLabel != null) rollLabel.setText("Failed to exit Re-Atoum → back to Rebirth");
-                        lastRoll = 0; refreshBoard(); return;
+                    if (lastRoll == 2) {
+                        piece.setCanExitNextTurn(false);
+                    } else {
+                        // Failed to exit Re-Atoum
+                        piece.setPosition(14);
+                        piece.setCanExitNextTurn(false);
+                        String playerName = (computerMode && game.getCurrentPlayer() == 2) ? "Computer" : "Player " + game.getCurrentPlayer();
+                        if (rollLabel != null) rollLabel.setText(playerName + " failed to exit Re-Atoum → back to Rebirth");
+                        lastRoll = 0;
+                        game.nextPlayer();
+                        refreshBoard();
+                        updateButtonState();
+                        // If computer mode and it's now computer's turn, auto-roll
+                        if (computerMode && game.getCurrentPlayer() == 2) {
+                            if (rollButton != null) rollButton.setEnabled(false);
+                            Timer timer = new Timer(1000, evt -> {
+                                rollSticks();
+                                Timer moveTimer = new Timer(1500, evt2 -> {
+                                    makeComputerMove();
+                                });
+                                moveTimer.setRepeats(false);
+                                moveTimer.start();
+                            });
+                            timer.setRepeats(false);
+                            timer.start();
+                        }
+                        return;
                     }
                 }
                 case 30 -> piece.setCanExitNextTurn(false);
