@@ -1,8 +1,9 @@
 
-import view.GameFrame;
+import view.ModeSelectionFrame;
 
 public class Main {
     public static void main(String[] args) {
-        new GameFrame();
+        // Show mode selection screen first
+        new ModeSelectionFrame();
     }
 }
