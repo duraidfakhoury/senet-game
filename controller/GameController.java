@@ -60,11 +60,28 @@ public class GameController {
         if (pieceToMove != null) {
             onPieceSelected(pieceToMove);
         } else {
+            // No valid moves found - skip turn
             if (rollLabel != null)
-                rollLabel.setText("Computer has no valid moves. Turn passed.");
+                rollLabel.setText("Computer has no valid moves. Turn skipped automatically.");
+            System.out.println("Computer skipped turn - no valid moves available for roll: " + lastRoll);
             lastRoll = 0;
             game.nextPlayer();
             refreshBoard();
+            updateButtonState();
+            
+            // If it's now computer's turn again (shouldn't happen, but handle it)
+            if (computerMode && game.getCurrentPlayer() == 2) {
+                Timer timer = new Timer(1000, evt -> {
+                    rollSticks();
+                    Timer moveTimer = new Timer(1500, evt2 -> {
+                        makeComputerMove();
+                    });
+                    moveTimer.setRepeats(false);
+                    moveTimer.start();
+                });
+                timer.setRepeats(false);
+                timer.start();
+            }
         }
     }
 
