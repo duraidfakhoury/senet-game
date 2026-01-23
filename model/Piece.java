@@ -1,8 +1,8 @@
 package model;
 
 public class Piece {
-    private int position; // -1 = خارج اللوح
-    private final int owner; // 1 أو 2
+    private int position;
+    private final int owner;
 
     public Piece(int owner) {
         this.owner = owner;

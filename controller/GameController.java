@@ -92,7 +92,7 @@ public class GameController {
 
         int pos = piece.getPosition();
 
-        // 1️⃣ Three Truths / Re-Atoum / Horus
+        // Three Truths / Re-Atoum / Horus
         if (piece.canExitNextTurn()) {
             int p = pos + 1;
             switch (p) {
@@ -162,14 +162,14 @@ public class GameController {
 
         int targetPos = pos + lastRoll;
 
-        // 2️⃣ House of Happiness
+        // House of Happiness
         if (pos < 25 && targetPos > 25) {
             if (rollLabel != null)
                 rollLabel.setText("Cannot move past House of Happiness! Must roll exact number.");
             return;
         }
 
-        // 3️⃣ Collision
+        //  Collision
         Piece occupyingPiece = game.getPieceAt(targetPos);
         if (occupyingPiece != null) {
             if (occupyingPiece.getOwner() != piece.getOwner()) {
@@ -182,7 +182,7 @@ public class GameController {
             }
         }
 
-        // 4️⃣ House of Rebirth if occupied
+        // House of Rebirth if occupied
         if (targetPos == 14) {
             Piece p = game.getPieceAt(14);
             if (p != null && p != piece) {
@@ -190,10 +190,10 @@ public class GameController {
             }
         }
 
-        // 5️⃣ Move piece
+        //  Move piece
         piece.setPosition(targetPos);
 
-        // 6️⃣ Other special houses
+        //  Other special houses
         switch (targetPos + 1) {
             case 15 -> { if (rollLabel != null) rollLabel.setText("Player landed on Rebirth!"); }
             case 26 -> { if (rollLabel != null) rollLabel.setText("Player landed on Happiness!"); }
@@ -203,7 +203,7 @@ public class GameController {
             case 30 -> { piece.setCanExitNextTurn(true); if (rollLabel != null) rollLabel.setText("Player landed on Horus!"); }
         }
 
-        // 7️⃣ Exit piece
+        //  Exit piece
         if (targetPos >= 30) {
             piece.setPosition(-1);
             game.incrementPlayerExited(piece.getOwner());
@@ -218,7 +218,7 @@ public class GameController {
             }
         }
 
-        // 8️⃣ Extra turn for 1,3,5
+        //  Extra turn for 1,3,5
         if (lastRoll == 1 || lastRoll == 3 || lastRoll == 5) {
             String playerName = (computerMode && game.getCurrentPlayer() == 2) ? "Computer" : "Player " + game.getCurrentPlayer();
             if (rollLabel != null) rollLabel.setText(playerName + " gets another turn!");
